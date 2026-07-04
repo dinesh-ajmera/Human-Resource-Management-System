@@ -12,10 +12,10 @@ app = Flask(__name__)
 app.secret_key = 'your_super_secret_key_here'
 @app.route("/signup" , methods=['POST','GET'])
 def signup():
-    # # if session.get('role')!= 'HR':
-    # #     return " you don't have admin privilages"
-    # else:
-        # if request.method=='POST':
+    if session.get('role')!= 'HR':
+        return " you don't have admin privilages"
+    else:
+        if request.method=='POST':
             commpony_name = request.form.get("comp_name")
             first_name= request.form.get("f_name")
             last_name=request.form.get("l_name")
@@ -36,9 +36,9 @@ def signup():
             flash(f"user is created you are an {role}")
             return redirect(url_for('admin_dashboard'))
             
-                # return "user is not creaed somtion done worng"
-        # else :
-        #     return redirect(url_for('login'))
+                #return "user is not creaed somtion done worng"
+        else :
+            return redirect(url_for('login'))
 
 @app.route("/login" , methods=['POST','GET'])
 def login():
@@ -78,6 +78,7 @@ def admin_dashboard():
     if session.get('role') !='HR':
         flash("your are not an admin !! alert")
         return redirect(url_for('login'))
+    cursor=cnx.cursor(dictionary=True)
     cursor.execute(f"select * from users where user_id = '{session.get('UID')}' " )
     profile_data = cursor.fetchone()
     cursor.execute(f"select  f_name ,email, l_name  from users  " )
@@ -90,6 +91,7 @@ def admin_dashboard():
 
 @app.route('/employee_dashboard')
 def employee_dashboard():
+    cursor=cnx.cursor(dictionary=True)
     cursor.execute(f"select * from users where user_id = '{session.get('UID')}' " )
     profile_data = cursor.fetchone()
     cursor.execute(f"select  f_name ,email, l_name  from users where role = 'employee' " )
