@@ -48,7 +48,7 @@ def login():
         
         role=request.form.get("role")
         cursor=cnx.cursor(dictionary=True)
-        cursor.execute(f"select password , salt  from users where email = '{email}' " )
+        cursor.execute(f"select password , salt , role , user_id from users where email = '{email}' " )
         user=cursor.fetchone()
         # print(user['salt'])
         if not user:
