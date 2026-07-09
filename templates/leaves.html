@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pending Leave Requests</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+
+body{
+    background:#f4f4f4;
+    padding:30px;
+}
+
+h2{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.card{
+    background:#fff;
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:20px;
+    margin-bottom:20px;
+}
+
+.row{
+    margin:8px 0;
+}
+
+input[type=text]{
+    width:100%;
+    padding:8px;
+    margin:10px 0;
+}
+
+.toggle{
+    display:flex;
+    gap:20px;
+    margin:15px 0;
+}
+
+button{
+    padding:8px 18px;
+    border:none;
+    background:#2563eb;
+    color:#fff;
+    border-radius:5px;
+    cursor:pointer;
+}
+</style>
+
+</head>
+<body>
+
+<h2>Pending Leave Requests</h2>
+
+{% if result %}
+
+{% for i in result %}
+
+<div class="card">
+
+<div class="row"><b>Request ID:</b> {{ i[0] }}</div>
+<div class="row"><b>Employee:</b> {{ i[1] }}</div>
+<div class="row"><b>Leave Start:</b> {{ i[2] }}</div>
+<div class="row"><b>Leave End:</b> {{ i[3] }}</div>
+<div class="row"><b>Employee Comment:</b> {{ i[4] }}</div>
+<div class="row"><b>Requested At:</b> {{ i[5] }}</div>
+
+<form action="/admin_responce" method="post">
+
+<input type="hidden" name="leave_id" value="{{i[0]}}">
+
+<input type="text" name="comment" placeholder="Admin comment" required>
+
+<div class="toggle">
+
+<label>
+<input type="radio" name="responce" value="approved" checked>
+Approve
+</label>
+
+<label>
+<input type="radio" name="responce" value="rejected">
+Reject
+</label>
+
+</div>
+
+<button type="submit">Submit</button>
+
+</form>
+
+</div>
+
+{% endfor %}
+
+{% endif %}
+
+</body>
+</html>

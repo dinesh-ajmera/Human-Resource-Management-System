@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Dashboard</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+
+body{
+    background:#f4f4f4;
+}
+
+nav{
+    background:#1f2937;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    color:#fff;
+}
+
+.left,.right{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+form{
+    display:inline;
+}
+
+button{
+    padding:8px 16px;
+    border:none;
+    border-radius:5px;
+    background:#3b82f6;
+    color:#fff;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#2563eb;
+}
+
+.main{
+    width:450px;
+    margin:60px auto;
+    background:#fff;
+    padding:25px;
+    border-radius:8px;
+}
+
+.main h2{
+    margin-bottom:20px;
+    text-align:center;
+}
+
+.leave-form{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.leave-form input{
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+.leave-box{
+    margin-top:20px;
+    background:#fff;
+    border-radius:8px;
+    padding:15px;
+}
+
+.leave-box summary{
+    list-style:none;
+    cursor:pointer;
+    background:#3b82f6;
+    color:#fff;
+    padding:10px;
+    border-radius:5px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.leave-box summary::-webkit-details-marker{
+    display:none;
+}
+
+.leave-form{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-top:15px;
+}
+
+.leave-form input{
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
+</style>
+</head>
+<body>
+
+<nav>
+
+<div class="left">
+
+<h2>Employee</h2>
+
+<form action="/attendances" method="post">
+<button type="submit">Attendance</button>
+</form>
+
+<form action="/history" method="post">
+<button type="submit">Leave History</button>
+</form>
+
+</div>
+
+<div class="right">
+
+<form action="/check_in" method="post">
+<button type="submit">Check In</button>
+</form>
+
+<form action="/check_out" method="post">
+<button type="submit">Check Out</button>
+</form>
+
+<form action="/logout" method="post">
+<button type="submit">Logout</button>
+</form>
+
+</div>
+
+</nav>
+
+<div class="main">
+
+<details class="leave-box">
+
+<summary>Request Leave</summary>
+
+<form action="/leave" method="post" class="leave-form">
+
+    <input type="date" name="start_date" required>
+
+    <input type="date" name="end_date" required>
+
+    <input type="tel" name="employee_comment" placeholder="Reason" required>
+
+    <button type="submit">Submit Request</button>
+
+</form>
+
+</details>
+</div>
+
+</body>
+</html>

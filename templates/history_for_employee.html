@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leave History</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+
+body{
+    background:#f4f4f4;
+    padding:30px;
+}
+
+.container{
+    width:95%;
+    margin:auto;
+}
+
+h2{
+    text-align:center;
+    margin-bottom:25px;
+    color:#333;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:#fff;
+}
+
+th,td{
+    padding:12px;
+    text-align:center;
+    border:1px solid #ddd;
+}
+
+th{
+    background:#1f2937;
+    color:#fff;
+}
+
+tr:nth-child(even){
+    background:#f8f8f8;
+}
+
+tr:hover{
+    background:#ececec;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h2>Leave History</h2>
+
+{% if result %}
+
+<table>
+
+<thead>
+<tr>
+            
+            <td>responded by</td>
+            <td>employee comments</td>
+            <td>admin comments</td>
+			
+			<td> responded at</td>
+            <td>leave start_date</td>
+			<td>leave end_date</td>
+			
+			<td>status</td>
+
+		</tr>
+</thead>
+
+<tbody>
+
+{% for i in result %}
+
+<tr>
+<td>{{ i[0] }}</td>
+<td>{{ i[1] }}</td>
+<td>{{ i[2] }}</td>
+<td>{{ i[3] }}</td>
+<td>{{ i[4] }}</td>
+<td>{{ i[5] }}</td>
+<td>
+{% if i[6]|lower == "approved" %}
+    <span style="color:green;font-weight:bold;">{{ i[6] }}</span>
+{% elif i[6]|lower == "rejected" %}
+    <span style="color:red;font-weight:bold;">{{ i[6] }}</span>
+{% else %}
+    <span style="color:orange;font-weight:bold;">{{ i[6] }}</span>
+{% endif %}
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% endif %}
+
+</div>
+
+</body>
+</html>

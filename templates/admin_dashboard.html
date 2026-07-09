@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+
+body{
+    background:#f4f4f4;
+}
+
+nav{
+    background:#1f2937;
+    color:#fff;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.left,.right{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+nav h2{
+    font-size:22px;
+}
+
+form{
+    display:inline;
+}
+
+button{
+    padding:8px 16px;
+    border:none;
+    border-radius:5px;
+    background:#3b82f6;
+    color:#fff;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#2563eb;
+}
+
+.main{
+    text-align:center;
+    margin-top:120px;
+}
+
+.main h1{
+    color:#222;
+    margin-bottom:10px;
+}
+
+.main p{
+    color:#666;
+}
+</style>
+
+</head>
+<body>
+
+<nav>
+
+<div class="left">
+
+<h2>Admin</h2>
+
+<form action="/attendances" method="post">
+<button type="submit">Attendance</button>
+</form>
+
+<form action="/leaves" method="post">
+<button type="submit">Pending Leaves</button>
+</form>
+
+<form action="/history" method="post">
+<button type="submit">Leave History</button>
+</form>
+
+</div>
+
+<div class="right">
+
+<form action="/check_in" method="post">
+<button type="submit">Check In</button>
+</form>
+
+<form action="/check_out" method="post">
+<button type="submit">Check Out</button>
+</form>
+
+
+<form action="/logout" method="post">
+<button type="submit">Logout</button>
+</form>
+</div>
+
+</nav>
+
+<div class="main">
+<h1>Welcome to Admin Dashboard</h1>
+<p>Manage attendance and leave records.</p>
+</div>
+
+</body>
+</html>

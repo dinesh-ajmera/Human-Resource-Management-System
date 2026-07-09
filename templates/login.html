@@ -3,21 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HRMS Signup</title>
+<title>HRMS Login</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
 
 body{
-    background:#f4f4f4;
     height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
+    background:#f4f4f4;
 }
 
 .box{
-    width:380px;
+    width:350px;
     background:#fff;
     padding:30px;
     border-radius:8px;
@@ -38,10 +38,10 @@ h2{
 form{
     display:flex;
     flex-direction:column;
-    gap:12px;
+    gap:15px;
 }
 
-input,select{
+input{
     padding:10px;
     border:1px solid #ccc;
     border-radius:5px;
@@ -74,7 +74,7 @@ a{
 
 <div class="box">
 
-<h2>Create Account</h2>
+<h2>HRMS Login</h2>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if data %}
@@ -82,28 +82,17 @@ a{
     {% endif %}
 {% endwith %}
 
-<form action="/signup" method="post">
-
-<input type="text" name="fr_name" placeholder="First Name" required>
-
-<input type="text" name="la_name" placeholder="Last Name" required>
+<form action="/login" method="post">
 
 <input type="email" name="email" placeholder="Email Address" required>
 
 <input type="password" name="password" placeholder="Password" required>
 
-<input type="number" name="mob_num" placeholder="Mobile Number" required>
-
-<select name="role">
-    <option value="employee">Employee</option>
-    <option value="HR">HR</option>
-</select>
-
-<button type="submit">Sign Up</button>
+<button type="submit">Login</button>
 
 </form>
 
-<a href="/login">Already have an account? Login</a>
+<a href="/signup">Create a new account</a>
 
 </div>
 

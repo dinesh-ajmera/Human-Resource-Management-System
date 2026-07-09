@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Error</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f4f4f4;
+}
+
+.box{
+    width:420px;
+    background:#fff;
+    padding:35px;
+    border-radius:8px;
+    text-align:center;
+    box-shadow:0 0 15px rgba(0,0,0,.1);
+    border-top:6px solid #dc2626;
+}
+
+.icon{
+    font-size:60px;
+    color:#dc2626;
+    margin-bottom:15px;
+}
+
+h2{
+    color:#dc2626;
+    margin-bottom:15px;
+}
+
+.message{
+    background:#fdecec;
+    color:#b91c1c;
+    padding:12px;
+    border-radius:5px;
+    margin:20px 0;
+    border:1px solid #f5c2c2;
+}
+
+a{
+    display:inline-block;
+    margin-top:10px;
+    padding:10px 22px;
+    background:#2563eb;
+    color:#fff;
+    text-decoration:none;
+    border-radius:5px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<div class="icon">⚠</div>
+
+<h2>Something Went Wrong</h2>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<a href="javascript:history.back()">Go Back</a>
+
+</div>
+
+</body>
+</html>

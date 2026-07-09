@@ -1,4 +1,3 @@
-mysql-connector-python
 flask
-hashlib
-os
+mysql
+werkzeug
