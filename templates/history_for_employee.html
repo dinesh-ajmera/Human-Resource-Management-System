@@ -1,113 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Leave History</title>
-
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-
-body{
-    background:#f4f4f4;
-    padding:30px;
-}
-
-.container{
-    width:95%;
-    margin:auto;
-}
-
-h2{
-    text-align:center;
-    margin-bottom:25px;
-    color:#333;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    background:#fff;
-}
-
-th,td{
-    padding:12px;
-    text-align:center;
-    border:1px solid #ddd;
-}
-
-th{
-    background:#1f2937;
-    color:#fff;
-}
-
-tr:nth-child(even){
-    background:#f8f8f8;
-}
-
-tr:hover{
-    background:#ececec;
-}
-</style>
-
-</head>
-<body>
-
-<div class="container">
-
-<h2>Leave History</h2>
-
-{% if result %}
-
-<table>
-
-<thead>
-<tr>
-            
-            <td>responded by</td>
-            <td>employee comments</td>
-            <td>admin comments</td>
-			
-			<td> responded at</td>
-            <td>leave start_date</td>
-			<td>leave end_date</td>
-			
-			<td>status</td>
-
-		</tr>
-</thead>
-
-<tbody>
-
-{% for i in result %}
-
-<tr>
-<td>{{ i[0] }}</td>
-<td>{{ i[1] }}</td>
-<td>{{ i[2] }}</td>
-<td>{{ i[3] }}</td>
-<td>{{ i[4] }}</td>
-<td>{{ i[5] }}</td>
-<td>
-{% if i[6]|lower == "approved" %}
-    <span style="color:green;font-weight:bold;">{{ i[6] }}</span>
-{% elif i[6]|lower == "rejected" %}
-    <span style="color:red;font-weight:bold;">{{ i[6] }}</span>
-{% else %}
-    <span style="color:orange;font-weight:bold;">{{ i[6] }}</span>
-{% endif %}
-</td>
-</tr>
-
-{% endfor %}
-
-</tbody>
-
-</table>
-
-{% endif %}
-
+{% extends "base.html" %}
+{% from "_macros.html" import badge, csrf %}
+{% block title %}My leaves{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>My leave requests</h1><p class="muted">Track the status of every request you have made</p></div>
+  <a class="btn" href="{{ url_for('employee_dashboard') }}">Request leave</a>
 </div>
 
-</body>
-</html>
+{% if result %}
+<div data-filterable>
+  <div class="toolbar">
+    <div class="chips">
+      <button type="button" class="chip active" data-filter="all">All</button>
+      <button type="button" class="chip" data-filter="pending">Pending</button>
+      <button type="button" class="chip" data-filter="approved">Approved</button>
+      <button type="button" class="chip" data-filter="rejected">Rejected</button>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Leave dates</th><th>Days</th><th>My reason</th><th>HR comment</th><th>Decided by</th><th>Decided on</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for r in result %}
+      <tr data-row data-status="{{ r.status }}">
+        <td class="nowrap">{{ r.start_date|date_fmt }} – {{ r.end_date|date_fmt }}</td>
+        <td>{{ r.start_date|days_between(r.end_date) }}</td>
+        <td class="cell-note">{{ r.employee_comment or '—' }}</td>
+        <td class="cell-note">{{ r.hr_comment or '—' }}</td>
+        <td>{{ r.responder or 'Awaiting HR' }}</td>
+        <td class="nowrap">{{ r.last_updated_at|datetime_fmt if r.status != 'pending' else '—' }}</td>
+        <td>{{ badge(r.status) }}</td>
+        <td>
+          {% if r.status == 'pending' %}
+          <form action="{{ url_for('cancel_leave') }}" method="post" data-confirm="Cancel this leave request?">
+            {{ csrf() }}<input type="hidden" name="leave_id" value="{{ r.leave_id }}">
+            <button class="btn danger small" type="submit">Cancel</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="empty" data-no-match hidden>No requests with that status.</div>
+  </div>
+</div>
+{% else %}
+<div class="card empty"><div class="icon">🌴</div><strong>No leave requests yet</strong><p>When you request leave it will show up here.</p></div>
+{% endif %}
+{% endblock %}

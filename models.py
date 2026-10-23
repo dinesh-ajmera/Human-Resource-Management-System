@@ -74,14 +74,15 @@ def connect(with_database=True):
     return mysql.connector.connect(**params)
 
 
-def run(sql, params=(), fetch=None, commit=False):
+def run(sql, params=(), fetch=None, commit=False, as_dict=False):
     """Run one SQL query on its own connection.
 
     fetch: "one" -> one row, "all" -> list of rows, None -> nothing.
-    Rows are plain tuples, in the same column order as the SELECT.
+    as_dict=True returns rows as dicts ({"column": value}) instead of tuples,
+    which makes templates easier to read (row.employee_name).
     """
     cnx = connect()
-    cursor = cnx.cursor()
+    cursor = cnx.cursor(dictionary=as_dict)
     try:
         cursor.execute(sql, params)
         result = None
@@ -125,9 +126,9 @@ def init_db(retries=10, delay=3):
 
 
 def authenticate_user(email, password):
-    """Return (password_hash, user_id, role) if login is valid, else None."""
+    """Return (password_hash, user_id, role, first_name) if login is valid."""
     row = run(
-        "SELECT password, user_id, role FROM users WHERE email = %s",
+        "SELECT password, user_id, role, f_name FROM users WHERE email = %s",
         (email,),
         fetch="one",
     )

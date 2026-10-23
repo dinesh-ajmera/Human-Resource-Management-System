@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}HRMS{% endblock %} · HRMS</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+{% if session.get('user_id') %}
+{% set ep = request.endpoint %}
+<header class="topbar">
+  <a class="brand" href="{{ url_for('dashboard') }}"><span class="logo">H</span>HRMS</a>
+  <button class="nav-toggle" type="button" aria-label="Menu" aria-expanded="false">☰</button>
+  <nav class="nav" id="nav">
+    {% if session.get('role') == 'HR' %}
+      <a href="{{ url_for('admin_dashboard') }}" class="{{ 'active' if ep == 'admin_dashboard' }}">Dashboard</a>
+      <a href="{{ url_for('leaves') }}" class="{{ 'active' if ep == 'leaves' }}">Pending leaves</a>
+      <a href="{{ url_for('history') }}" class="{{ 'active' if ep == 'history' }}">Leave history</a>
+      <a href="{{ url_for('attendaces') }}" class="{{ 'active' if ep == 'attendaces' }}">Attendance</a>
+      <a href="{{ url_for('signup') }}" class="{{ 'active' if ep == 'signup' }}">Add user</a>
+    {% else %}
+      <a href="{{ url_for('employee_dashboard') }}" class="{{ 'active' if ep == 'employee_dashboard' }}">Dashboard</a>
+      <a href="{{ url_for('history') }}" class="{{ 'active' if ep == 'history' }}">My leaves</a>
+      <a href="{{ url_for('attendaces') }}" class="{{ 'active' if ep == 'attendaces' }}">My attendance</a>
+    {% endif %}
+  </nav>
+  <div class="user">
+    <span class="avatar">{{ (session.get('name') or '?')[0]|upper }}</span>
+    <div class="who"><strong>{{ session.get('name') }}</strong><small>{{ session.get('role') }}</small></div>
+    <form action="{{ url_for('logout') }}" method="post">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <button class="btn ghost small" type="submit">Logout</button>
+    </form>
+  </div>
+</header>
+{% endif %}
+
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flashes">
+      {% for category, message in messages %}
+      <div class="flash {{ category }}" role="alert"><span>{{ message }}</span><button type="button" class="flash-close" aria-label="Dismiss">×</button></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

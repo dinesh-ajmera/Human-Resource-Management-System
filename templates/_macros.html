@@ -1,0 +1,3 @@
+{% macro csrf() %}<input type="hidden" name="_csrf" value="{{ csrf_token() }}">{% endmacro %}
+
+{% macro badge(status) %}<span class="badge {{ status }}">{{ (status or '')|replace('_', ' ')|capitalize }}</span>{% endmacro %}

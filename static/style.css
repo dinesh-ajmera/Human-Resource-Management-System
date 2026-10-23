@@ -1,0 +1,155 @@
+/* ---------- design tokens ---------- */
+:root{
+  --bg:#f4f5fb; --surface:#fff; --text:#1b2235; --muted:#667085; --border:#e4e7ee;
+  --btn:#4f46e5; --btn-hover:#4338ca; --primary-soft:#eef0ff; --primary-text:#4338ca;
+  --ok:#15803d; --ok-soft:#dcfce7; --bad:#b91c1c; --bad-soft:#fee2e2;
+  --warn:#b45309; --warn-soft:#fef3c7; --info:#1d4ed8; --info-soft:#dbeafe;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 4px 14px rgba(16,24,40,.06);
+  --radius:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0e1424; --surface:#161d31; --text:#e7eaf3; --muted:#9aa4bd; --border:#26304a;
+    --btn:#6366f1; --btn-hover:#818cf8; --primary-soft:#1f2747; --primary-text:#a5b4fc;
+    --ok:#4ade80; --ok-soft:#12301f; --bad:#f87171; --bad-soft:#3a1717;
+    --warn:#fbbf24; --warn-soft:#38290c; --info:#60a5fa; --info-soft:#14284a;
+    --shadow:none;
+  }
+}
+
+/* ---------- base ---------- */
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+a{color:var(--primary-text);text-decoration:none}
+a:hover{text-decoration:underline}
+h1{font-size:1.6rem;line-height:1.25} h2{font-size:1.05rem}
+.muted{color:var(--muted)} small{font-size:.82rem}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--btn);outline-offset:2px}
+.container{max-width:1080px;margin:0 auto;padding:24px 18px 48px}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;padding:10px 22px;background:var(--surface);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.1rem;color:var(--text)}
+.brand:hover{text-decoration:none}
+.logo{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:var(--btn);color:#fff;font-weight:800}
+.nav{display:flex;gap:4px;flex:1}
+.nav a{padding:8px 13px;border-radius:9px;color:var(--muted);font-weight:500;font-size:.95rem}
+.nav a:hover{background:var(--primary-soft);color:var(--primary-text);text-decoration:none}
+.nav a.active{background:var(--primary-soft);color:var(--primary-text)}
+.user{display:flex;align-items:center;gap:10px}
+.avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--primary-soft);color:var(--primary-text);font-weight:700}
+.who{display:flex;flex-direction:column;line-height:1.2}
+.who small{color:var(--muted)}
+.nav-toggle{display:none;background:none;border:1px solid var(--border);border-radius:9px;padding:6px 11px;font-size:1.1rem;color:var(--text);cursor:pointer}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border:1px solid transparent;border-radius:10px;background:var(--btn);color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--btn-hover);text-decoration:none}
+.btn.small{padding:6px 12px;font-size:.85rem}
+.btn.block{width:100%}
+.btn.ghost{background:transparent;color:var(--text);border-color:var(--border)}
+.btn.ghost:hover{background:var(--primary-soft)}
+.btn.danger{background:var(--bad-soft);color:var(--bad)}
+.btn.danger:hover{background:var(--bad);color:#fff}
+.btn.ok{background:var(--ok-soft);color:var(--ok)}
+.btn.ok:hover{background:var(--ok);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- flash messages ---------- */
+.flashes{display:grid;gap:10px;margin-bottom:18px}
+.flash{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;border:1px solid transparent;font-size:.95rem}
+.flash.success{background:var(--ok-soft);color:var(--ok)}
+.flash.error{background:var(--bad-soft);color:var(--bad)}
+.flash.info,.flash.message{background:var(--info-soft);color:var(--info)}
+.flash-close{background:none;border:0;color:inherit;font-size:1.3rem;line-height:1;cursor:pointer}
+
+/* ---------- layout pieces ---------- */
+.hero{margin-bottom:22px}
+.hero p{margin-top:4px}
+.grid{display:grid;gap:16px}
+.stats{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));margin-bottom:18px}
+.two{grid-template-columns:repeat(auto-fit,minmax(340px,1fr));align-items:start}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.stat{display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);color:var(--text)}
+a.stat:hover{text-decoration:none;border-color:var(--btn)}
+.stat .label{color:var(--muted);font-size:.85rem;font-weight:500}
+.stat .value{font-size:2rem;font-weight:700;line-height:1.2;margin-top:2px}
+.stat.warn .value{color:var(--warn)} .stat.ok .value{color:var(--ok)} .stat.bad .value{color:var(--bad)}
+.big{font-size:1.25rem;font-weight:700}
+.actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.stack{display:grid;gap:14px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+
+/* ---------- forms ---------- */
+.field{display:grid;gap:5px}
+.field label{font-size:.88rem;font-weight:600}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--btn);border-color:transparent}
+textarea{resize:vertical}
+.pw{position:relative}
+.pw input{padding-right:64px}
+.pw button{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--primary-text);font-weight:600;font-size:.82rem;cursor:pointer}
+.hint{font-size:.82rem;color:var(--muted)}
+
+/* ---------- badges ---------- */
+.badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.78rem;font-weight:600;background:var(--primary-soft);color:var(--primary-text)}
+.badge.approved,.badge.present,.badge.live{background:var(--ok-soft);color:var(--ok)}
+.badge.rejected,.badge.absent{background:var(--bad-soft);color:var(--bad)}
+.badge.pending,.badge.half_day{background:var(--warn-soft);color:var(--warn)}
+.badge.checked_out,.badge.leave{background:var(--info-soft);color:var(--info)}
+
+/* ---------- tables, filters ---------- */
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.toolbar input[type=search]{max-width:260px;margin-left:auto}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:6px 14px;border:1px solid var(--border);border-radius:999px;background:var(--surface);color:var(--muted);font-size:.85rem;font-weight:600;cursor:pointer}
+.chip.active{background:var(--btn);border-color:var(--btn);color:#fff}
+.table-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--bg);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--primary-soft)}
+td.nowrap{white-space:nowrap}
+.cell-note{max-width:260px;word-break:break-word}
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty .icon{font-size:2.2rem;margin-bottom:8px}
+
+/* ---------- leave cards (HR) ---------- */
+.leave-grid{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.person{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.quote{margin:12px 0;padding:10px 12px;border-left:3px solid var(--btn);background:var(--bg);border-radius:0 8px 8px 0;font-size:.92rem;word-break:break-word}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:.9rem;padding:3px 0}
+.kv span:first-child{color:var(--muted)}
+.decision{display:grid;gap:10px;margin-top:14px}
+.decision .btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* ---------- auth + error pages ---------- */
+.auth{max-width:430px;margin:5vh auto 0}
+.auth .card{padding:30px}
+.auth .logo{width:44px;height:44px;font-size:1.3rem;margin:0 auto 12px}
+.auth h1{text-align:center;font-size:1.4rem}
+.auth .sub{text-align:center;margin:4px 0 22px}
+.auth .alt{text-align:center;margin-top:18px;font-size:.92rem}
+.notice{padding:10px 12px;border-radius:10px;font-size:.9rem;margin-bottom:14px}
+.notice.error{background:var(--bad-soft);color:var(--bad)}
+.errbox{max-width:480px;margin:10vh auto 0;text-align:center}
+.errbox .code{font-size:3rem;font-weight:800;color:var(--bad)}
+.errbox p{margin:8px 0 22px}
+.errbox .actions{justify-content:center}
+
+/* ---------- small screens ---------- */
+@media (max-width:760px){
+  .topbar{flex-wrap:wrap;gap:10px;padding:10px 14px}
+  .nav-toggle{display:block;margin-left:auto}
+  .nav{display:none;order:3;flex-basis:100%;flex-direction:column}
+  .nav.open{display:flex}
+  .who{display:none}
+  .row2{grid-template-columns:1fr}
+  .two{grid-template-columns:1fr}
+  .toolbar input[type=search]{max-width:none;margin-left:0;width:100%}
+}

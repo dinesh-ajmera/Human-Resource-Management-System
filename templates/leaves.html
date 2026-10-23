@@ -1,102 +1,40 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Pending Leave Requests</title>
-
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
-
-body{
-    background:#f4f4f4;
-    padding:30px;
-}
-
-h2{
-    text-align:center;
-    margin-bottom:25px;
-}
-
-.card{
-    background:#fff;
-    border:1px solid #ddd;
-    border-radius:8px;
-    padding:20px;
-    margin-bottom:20px;
-}
-
-.row{
-    margin:8px 0;
-}
-
-input[type=text]{
-    width:100%;
-    padding:8px;
-    margin:10px 0;
-}
-
-.toggle{
-    display:flex;
-    gap:20px;
-    margin:15px 0;
-}
-
-button{
-    padding:8px 18px;
-    border:none;
-    background:#2563eb;
-    color:#fff;
-    border-radius:5px;
-    cursor:pointer;
-}
-</style>
-
-</head>
-<body>
-
-<h2>Pending Leave Requests</h2>
+{% extends "base.html" %}
+{% from "_macros.html" import csrf %}
+{% block title %}Pending leaves{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Pending leave requests</h1>
+    <p class="muted">{{ result|length }} request{{ '' if result|length == 1 else 's' }} waiting for your decision</p>
+  </div>
+</div>
 
 {% if result %}
-
-{% for i in result %}
-
-<div class="card">
-
-<div class="row"><b>Request ID:</b> {{ i[0] }}</div>
-<div class="row"><b>Employee:</b> {{ i[1] }}</div>
-<div class="row"><b>Leave Start:</b> {{ i[2] }}</div>
-<div class="row"><b>Leave End:</b> {{ i[3] }}</div>
-<div class="row"><b>Employee Comment:</b> {{ i[4] }}</div>
-<div class="row"><b>Requested At:</b> {{ i[5] }}</div>
-
-<form action="/admin_responce" method="post">
-
-<input type="hidden" name="leave_id" value="{{i[0]}}">
-
-<input type="text" name="comment" placeholder="Admin comment" required>
-
-<div class="toggle">
-
-<label>
-<input type="radio" name="responce" value="approved" checked>
-Approve
-</label>
-
-<label>
-<input type="radio" name="responce" value="rejected">
-Reject
-</label>
-
+<div class="grid leave-grid">
+  {% for i in result %}
+  <div class="card">
+    <div class="person">
+      <span class="avatar">{{ i.employee_name[0]|upper }}</span>
+      <div><strong>{{ i.employee_name }}</strong><br><small class="muted">Employee ID {{ i.employee_id }} · Request #{{ i.leave_id }}</small></div>
+    </div>
+    <div class="kv"><span>From</span><strong>{{ i.start_date|date_fmt }}</strong></div>
+    <div class="kv"><span>To</span><strong>{{ i.end_date|date_fmt }}</strong></div>
+    <div class="kv"><span>Duration</span><strong>{{ i.start_date|days_between(i.end_date) }} day{{ '' if i.start_date|days_between(i.end_date) == 1 else 's' }}</strong></div>
+    <div class="kv"><span>Requested</span><span>{{ i.created_at|datetime_fmt }}</span></div>
+    <div class="quote">{{ i.employee_comment }}</div>
+    <form action="{{ url_for('admin_responce') }}" method="post" class="decision">
+      {{ csrf() }}
+      <input type="hidden" name="leave_id" value="{{ i.leave_id }}">
+      <input type="text" name="comment" maxlength="200" placeholder="Comment for the employee (optional)">
+      <div class="btns">
+        <button class="btn ok" type="submit" name="responce" value="approved">Approve</button>
+        <button class="btn danger" type="submit" name="responce" value="rejected">Reject</button>
+      </div>
+    </form>
+  </div>
+  {% endfor %}
 </div>
-
-<button type="submit">Submit</button>
-
-</form>
-
-</div>
-
-{% endfor %}
-
+{% else %}
+<div class="card empty"><div class="icon">✅</div><strong>All caught up</strong><p>There are no pending leave requests.</p></div>
 {% endif %}
-
-</body>
-</html>
+{% endblock %}

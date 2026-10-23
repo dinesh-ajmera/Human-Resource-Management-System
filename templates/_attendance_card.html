@@ -1,0 +1,25 @@
+{% from "_macros.html" import badge, csrf %}
+<div class="card">
+  <div class="card-head">
+    <h2>Today's attendance</h2>
+    {% if today %}{{ badge(today.live_status) }}{% endif %}
+  </div>
+  {% if not today %}
+    <p class="big">Not checked in yet</p>
+    <p class="muted">Press Check in to start your day.</p>
+  {% elif today.live_status == 'live' %}
+    <p class="big">Checked in at {{ today.check_in|time_fmt }}</p>
+    <p class="muted">Remember to check out when you finish.</p>
+  {% else %}
+    <p class="big">Day complete</p>
+    <p class="muted">In {{ today.check_in|time_fmt }} · Out {{ today.check_out|time_fmt }} · {{ today.check_in|duration(today.check_out) }}</p>
+  {% endif %}
+  <div class="actions">
+    <form action="{{ url_for('check_in') }}" method="post">{{ csrf() }}
+      <button class="btn" type="submit" {{ 'disabled' if today }}>Check in</button>
+    </form>
+    <form action="{{ url_for('check_out') }}" method="post">{{ csrf() }}
+      <button class="btn ghost" type="submit" {{ 'disabled' if (not today) or today.live_status == 'checked_out' }}>Check out</button>
+    </form>
+  </div>
+</div>

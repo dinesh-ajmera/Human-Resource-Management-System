@@ -1,11 +1,13 @@
 services:
   db:
     image: mysql:8.0
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
+      TZ: ${TZ:-Asia/Kolkata}
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -16,12 +18,14 @@ services:
 
   web:
     build: .
+    restart: unless-stopped
     environment:
       DB_HOST: db
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       SECRET_KEY: ${SECRET_KEY}
+      TZ: ${TZ:-Asia/Kolkata}
     ports:
       - "5000:5000"
     depends_on:
