@@ -5,4 +5,4 @@ set -e
 python models.py
 
 # 2) start the web server
-exec gunicorn --bind 0.0.0.0:5000 --workers 2 routes:app
+python routes.py

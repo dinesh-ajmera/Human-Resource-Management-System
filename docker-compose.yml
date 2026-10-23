@@ -1,7 +1,6 @@
 services:
   db:
     image: mysql:8.0
-    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
@@ -17,7 +16,6 @@ services:
 
   web:
     build: .
-    restart: unless-stopped
     environment:
       DB_HOST: db
       DB_NAME: ${DB_NAME}
