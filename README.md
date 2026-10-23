@@ -1,3 +1,4 @@
+   ![CI](https://github.com/dinesh-ajmera/Human-Resource-Management-System/actions/workflows/ci.yml/badge.svg)
 # HR Management System (Flask + MySQL)
 
 A web app where employees sign up, check in and out, and request leave,

@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Check Python syntax
+        run: python -m compileall -q .
+
+      - name: Create .env for the test run
+        run: cp .env.example .env
+
+      - name: Build and start the app with Docker Compose
+        run: docker compose up -d --build
+
+      - name: Wait until /health returns 200
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fs http://localhost:5000/health; then
+              echo; echo "App is healthy"; exit 0
+            fi
+            echo "waiting... ($i)"; sleep 5
+          done
+          echo "App did not become healthy"; exit 1
+
+      - name: Show logs if something failed
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop everything
+        if: always()
+        run: docker compose down -v
