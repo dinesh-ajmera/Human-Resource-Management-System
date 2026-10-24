@@ -30,6 +30,7 @@ Create the first account with the role **HR**. After one HR account exists,
 only a logged-in HR user can create more HR accounts; everyone else who
 registers becomes an employee.
 
+
 Stop everything: `docker compose down` (add `-v` to also delete the data).
 
 ## Run without Docker
