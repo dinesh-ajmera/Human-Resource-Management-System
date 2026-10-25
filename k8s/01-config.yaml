@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hrms-config
+  namespace: hrms
+data:
+  DB_HOST: mysql
+  DB_NAME: HR_system
+  DB_USER: hrms_user
+  TZ: Asia/Kolkata
