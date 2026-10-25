@@ -8,5 +8,5 @@ venv/
 *.tfstate.*
 .terraform/
 terraform.tfvars
-
+jenkins/.env
 
