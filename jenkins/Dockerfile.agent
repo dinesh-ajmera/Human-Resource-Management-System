@@ -1,6 +1,6 @@
 FROM jenkins/inbound-agent:latest
 USER root
-ARG TRIVY_VERSION=0.57.0
+ARG TRIVY_VERSION=0.76.1
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       ansible curl git openssh-client python3 ca-certificates unzip \

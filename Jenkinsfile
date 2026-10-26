@@ -1,17 +1,28 @@
 pipeline {
   agent { label 'docker-agent' }
 
+  environment {
+    AWS_REGION = 'ap-south-1'
+    IMAGE      = 'hrms'
+  }
+
   options {
     timestamps()
     disableConcurrentBuilds()
-    timeout(time: 20, unit: 'MINUTES')
+    timeout(time: 25, unit: 'MINUTES')
   }
 
   triggers { pollSCM('H/2 * * * *') }
 
   stages {
     stage('Checkout') {
-      steps { checkout scm }
+      steps {
+        checkout scm
+        script {
+          def sha = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+          env.IMAGE_TAG = "${env.BUILD_NUMBER}-${sha}"
+        }
+      }
     }
 
     stage('Syntax check') {
@@ -19,7 +30,30 @@ pipeline {
     }
 
     stage('Build image') {
-      steps { sh 'docker build -t hrms:${BUILD_NUMBER} .' }
+      steps { sh 'docker build -t ${IMAGE}:${IMAGE_TAG} .' }
+    }
+
+    stage('Scan image') {
+      steps {
+        // report HIGH and CRITICAL, but only fail the build on fixable CRITICAL
+        sh 'trivy image --no-progress --severity HIGH,CRITICAL --ignore-unfixed ${IMAGE}:${IMAGE_TAG}'
+        sh 'trivy image --no-progress --exit-code 1 --severity CRITICAL --ignore-unfixed ${IMAGE}:${IMAGE_TAG}'
+      }
+    }
+
+    stage('Push to ECR') {
+      steps {
+        sh '''
+          set -e
+          ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY=$ACCOUNT.dkr.ecr.${AWS_REGION}.amazonaws.com
+          aws ecr get-login-password --region ${AWS_REGION} \
+            | docker login --username AWS --password-stdin $REGISTRY
+          docker tag ${IMAGE}:${IMAGE_TAG} $REGISTRY/${IMAGE}:${IMAGE_TAG}
+          docker push $REGISTRY/${IMAGE}:${IMAGE_TAG}
+          echo "Pushed $REGISTRY/${IMAGE}:${IMAGE_TAG}"
+        '''
+      }
     }
 
     stage('Deploy with Ansible') {
@@ -57,7 +91,7 @@ pipeline {
   }
 
   post {
-    success { echo 'Deployed and healthy.' }
+    success { echo "Built, scanned, pushed and deployed ${env.IMAGE_TAG}" }
     failure { echo 'Pipeline failed. Check the stage logs.' }
   }
 }
