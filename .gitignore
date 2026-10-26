@@ -6,7 +6,7 @@ venv/
 *.pem
 *.tfstate
 *.tfstate.*
-.terraform/
+.terraform*
 terraform.tfvars
 jenkins/.env
 

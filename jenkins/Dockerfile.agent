@@ -1,8 +1,13 @@
 FROM jenkins/inbound-agent:latest
 USER root
+ARG TRIVY_VERSION=0.57.0
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      ansible curl git openssh-client python3 ca-certificates \
+      ansible curl git openssh-client python3 ca-certificates unzip \
  && (apt-get install -y --no-install-recommends docker-cli \
      || apt-get install -y --no-install-recommends docker.io) \
- && rm -rf /var/lib/apt/lists/*
+ && curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o /tmp/awscliv2.zip \
+ && unzip -q /tmp/awscliv2.zip -d /tmp && /tmp/aws/install \
+ && curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+      | sh -s -- -b /usr/local/bin v${TRIVY_VERSION} \
+ && rm -rf /tmp/aws /tmp/awscliv2.zip /var/lib/apt/lists/*
