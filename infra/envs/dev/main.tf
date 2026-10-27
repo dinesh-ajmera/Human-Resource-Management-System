@@ -2,6 +2,7 @@ terraform {
   required_version = ">= 1.10"
   required_providers {
     aws = { source = "hashicorp/aws", version = "~> 5.0" }
+    random = { source = "hashicorp/random", version = "~> 3.6" }
   }
 }
 
@@ -24,3 +25,5 @@ module "vpc" {
 output "vpc_id" { value = module.vpc.vpc_id }
 output "public_subnet_ids" { value = module.vpc.public_subnet_ids }
 output "private_subnet_ids" { value = module.vpc.private_subnet_ids }
+output "rds_endpoint" { value = aws_db_instance.hrms.address }
+output "app_secret_name" { value = aws_secretsmanager_secret.app.name }
