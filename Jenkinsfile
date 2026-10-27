@@ -9,7 +9,7 @@ pipeline {
   options {
     timestamps()
     disableConcurrentBuilds()
-    timeout(time: 25, unit: 'MINUTES')
+    timeout(time: 40, unit: 'MINUTES')
   }
 
   triggers { pollSCM('H/2 * * * *') }
@@ -56,39 +56,52 @@ pipeline {
       }
     }
 
-    stage('Deploy with Ansible') {
+        stage('Release to Auto Scaling Group') {
       steps {
-        withCredentials([
-          file(credentialsId: 'hrms-ssh-key', variable: 'SSH_KEY'),
-          string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS'),
-          string(credentialsId: 'hrms-server-ip', variable: 'SERVER_IP')
-        ]) {
-          dir('ansible') {
-            sh '''
-              set -e
-              mkdir -p ~/.ssh
-              ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts
-              printf '[hrms]\n%s ansible_user=ubuntu ansible_python_interpreter=/usr/bin/python3\n' "$SERVER_IP" > inventory.jenkins
-              VF=$(mktemp)
-              trap 'rm -f "$VF" inventory.jenkins' EXIT
-              printf '%s' "$VAULT_PASS" > "$VF"
-              ansible-playbook -i inventory.jenkins playbook.yml \
-                --vault-password-file "$VF" \
-                -e ansible_ssh_private_key_file="$SSH_KEY"
-            '''
-          }
-        }
+        sh '''
+          set -e
+          PARAM=/hrms/dev/image_tag
+          ASG=hrms-dev-asg
+          PREFS='{"MinHealthyPercentage":50,"InstanceWarmup":120}'
+
+          PREV=$(aws ssm get-parameter --name $PARAM --query Parameter.Value --output text --region $AWS_REGION)
+          echo "Previous tag: $PREV   New tag: $IMAGE_TAG"
+
+          aws ssm put-parameter --name $PARAM --value "$IMAGE_TAG" --overwrite --region $AWS_REGION
+          aws autoscaling start-instance-refresh --auto-scaling-group-name $ASG \
+            --preferences "$PREFS" --region $AWS_REGION
+
+          for i in $(seq 1 60); do
+            STATUS=$(aws autoscaling describe-instance-refreshes --auto-scaling-group-name $ASG \
+              --max-records 1 --query 'InstanceRefreshes[0].Status' --output text --region $AWS_REGION)
+            echo "Refresh status: $STATUS ($i/60)"
+            case "$STATUS" in
+              Successful) exit 0 ;;
+              Failed|Cancelled|Cancelling|RollbackFailed) break ;;
+            esac
+            sleep 20
+          done
+
+          echo "Release did not finish. Rolling back to $PREV"
+          aws autoscaling cancel-instance-refresh --auto-scaling-group-name $ASG --region $AWS_REGION || true
+          sleep 30
+          aws ssm put-parameter --name $PARAM --value "$PREV" --overwrite --region $AWS_REGION
+          aws autoscaling start-instance-refresh --auto-scaling-group-name $ASG \
+            --preferences "$PREFS" --region $AWS_REGION || true
+          exit 1
+        '''
       }
     }
 
     stage('Verify') {
       steps {
-        withCredentials([string(credentialsId: 'hrms-server-ip', variable: 'SERVER_IP')]) {
-          sh 'curl -fsS --retry 10 --retry-delay 5 --retry-connrefused http://$SERVER_IP:5000/health'
-        }
+        sh '''
+          ALB=$(aws elbv2 describe-load-balancers --names hrms-dev-alb \
+                --query 'LoadBalancers[0].DNSName' --output text --region $AWS_REGION)
+          curl -fsS --retry 10 --retry-delay 5 --retry-connrefused http://$ALB/health
+        '''
       }
     }
-  }
 
   post {
     success { echo "Built, scanned, pushed and deployed ${env.IMAGE_TAG}" }

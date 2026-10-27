@@ -14,7 +14,7 @@ resource "aws_db_parameter_group" "mysql" {
 
   parameter {
     name  = "time_zone"
-    value = "Asia/Kolkata" # keeps CURDATE() and timestamps in IST
+    value = "Asia/Calcutta" # keeps CURDATE() and timestamps in IST
   }
 }
 
