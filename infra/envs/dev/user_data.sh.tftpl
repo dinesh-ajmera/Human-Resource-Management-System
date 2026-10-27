@@ -1,0 +1,32 @@
+#!/bin/bash
+# No "set -x" on purpose: it would print the secrets into the boot log.
+set -eu
+
+dnf install -y docker jq
+systemctl enable --now docker
+
+REGION="${region}"
+ACCOUNT=$(aws sts get-caller-identity --query Account --output text --region "$REGION")
+REGISTRY="$ACCOUNT.dkr.ecr.$REGION.amazonaws.com"
+TAG=$(aws ssm get-parameter --name "${param}" --query Parameter.Value --output text --region "$REGION")
+
+# Settings come from Secrets Manager into a root-only file, never baked into the image
+umask 077
+aws secretsmanager get-secret-value --secret-id "${secret}" \
+  --query SecretString --output text --region "$REGION" \
+  | jq -r 'to_entries[] | "\(.key)=\(.value)"' > /etc/hrms.env
+echo "TZ=Asia/Kolkata" >> /etc/hrms.env
+
+TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 60")
+IID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
+
+aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "$REGISTRY"
+docker pull "$REGISTRY/hrms:$TAG"
+
+docker run -d --name hrms --restart unless-stopped \
+  -p 5000:5000 --env-file /etc/hrms.env \
+  --log-driver awslogs \
+  --log-opt awslogs-region="$REGION" \
+  --log-opt awslogs-group="${log_group}" \
+  --log-opt awslogs-stream="$IID" \
+  "$REGISTRY/hrms:$TAG"
