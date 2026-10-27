@@ -102,10 +102,10 @@ pipeline {
         '''
       }
     }
+  }
 
   post {
     success { echo "Built, scanned, pushed and deployed ${env.IMAGE_TAG}" }
     failure { echo 'Pipeline failed. Check the stage logs.' }
   }
-}
 }
