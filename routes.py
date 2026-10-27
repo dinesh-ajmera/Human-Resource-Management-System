@@ -148,6 +148,9 @@ def health():
         log.exception("health check: database is down")
         return jsonify(status="degraded", database="down"), 503
 
+@app.route('/live')
+def live():
+    return jsonify(status="alive"), 200
 
 @app.route('/')
 def welcome():
