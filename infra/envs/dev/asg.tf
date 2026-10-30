@@ -7,16 +7,6 @@ resource "aws_cloudwatch_log_group" "app" {
   retention_in_days = 14
 }
 
-# The image tag every new instance runs. Jenkins updates this value on each release.
-resource "aws_ssm_parameter" "image_tag" {
-  name  = "/hrms/dev/image_tag"
-  type  = "String"
-  value = var.initial_image_tag
-
-  lifecycle {
-    ignore_changes = [value]
-  }
-}
 
 resource "aws_launch_template" "app" {
   name_prefix            = "hrms-dev-app-"
@@ -45,7 +35,7 @@ resource "aws_launch_template" "app" {
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh.tftpl", {
     region    = "ap-south-1"
-    param     = aws_ssm_parameter.image_tag.name
+    param     = data.aws_ssm_parameter.image_tag.name
     secret    = aws_secretsmanager_secret.app.name
     log_group = aws_cloudwatch_log_group.app.name
   }))
@@ -103,5 +93,15 @@ resource "aws_autoscaling_policy" "cpu" {
       predefined_metric_type = "ASGAverageCPUUtilization"
     }
     target_value = 50
+  }
+}
+
+metrics_granularity = "1Minute"
+enabled_metrics     = ["GroupInServiceInstances", "GroupDesiredCapacity", "GroupTotalInstances"]
+
+lifecycle {
+  precondition {
+    condition     = data.aws_ssm_parameter.image_tag.insecure_value != "unset"
+    error_message = "No image has been released yet. Run the Jenkins pipeline first."
   }
 }

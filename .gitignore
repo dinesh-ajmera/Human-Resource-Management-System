@@ -9,4 +9,5 @@ venv/
 .terraform*
 terraform.tfvars
 jenkins/.env
-
+infra/**/.terraform/
+*.tfvars

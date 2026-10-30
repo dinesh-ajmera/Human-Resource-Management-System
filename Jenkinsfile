@@ -56,7 +56,7 @@ pipeline {
       }
     }
 
-        stage('Release to Auto Scaling Group') {
+            stage('Release') {
       steps {
         sh '''
           set -e
@@ -65,8 +65,16 @@ pipeline {
           PREFS='{"MinHealthyPercentage":50,"InstanceWarmup":120}'
 
           PREV=$(aws ssm get-parameter --name $PARAM --query Parameter.Value --output text --region $AWS_REGION)
-          echo "Previous tag: $PREV   New tag: $IMAGE_TAG"
+          FOUND=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $ASG \
+                  --query 'length(AutoScalingGroups)' --output text --region $AWS_REGION)
 
+          if [ "$FOUND" = "0" ]; then
+            aws ssm put-parameter --name $PARAM --value "$IMAGE_TAG" --overwrite --region $AWS_REGION
+            echo "No Auto Scaling Group yet. Recorded $IMAGE_TAG for the next environment bring-up."
+            exit 0
+          fi
+
+          echo "Previous tag: $PREV   New tag: $IMAGE_TAG"
           aws ssm put-parameter --name $PARAM --value "$IMAGE_TAG" --overwrite --region $AWS_REGION
           aws autoscaling start-instance-refresh --auto-scaling-group-name $ASG \
             --preferences "$PREFS" --region $AWS_REGION
@@ -97,7 +105,11 @@ pipeline {
       steps {
         sh '''
           ALB=$(aws elbv2 describe-load-balancers --names hrms-dev-alb \
-                --query 'LoadBalancers[0].DNSName' --output text --region $AWS_REGION)
+                --query 'LoadBalancers[0].DNSName' --output text --region $AWS_REGION 2>/dev/null || true)
+          if [ -z "$ALB" ] || [ "$ALB" = "None" ]; then
+            echo "No load balancer yet, skipping verify."
+            exit 0
+          fi
           curl -fsS --retry 10 --retry-delay 5 --retry-connrefused http://$ALB/health
         '''
       }

@@ -23,7 +23,16 @@ data "aws_iam_policy_document" "app" {
       "ecr:BatchGetImage",
       "ecr:GetDownloadUrlForLayer",
     ]
-    resources = [aws_ecr_repository.hrms.arn]
+    resources = [data.aws_ecr_repository.hrms.arn]
+  }
+}
+data "aws_iam_policy_document" "ec2_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
   }
 }
 

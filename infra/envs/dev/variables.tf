@@ -8,8 +8,8 @@ variable "db_multi_az" {
   type        = bool
   default     = true
 }
-variable "initial_image_tag" {
-  description = "An image tag that already exists in ECR"
+variable "alert_email" {
+  description = "Where alarm emails go"
   type        = string
 }
 
