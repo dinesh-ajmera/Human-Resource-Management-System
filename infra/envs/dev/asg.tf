@@ -55,6 +55,15 @@ resource "aws_autoscaling_group" "app" {
   target_group_arns         = [aws_lb_target_group.app.arn]
   health_check_type         = "ELB"
   health_check_grace_period = 300
+  metrics_granularity = "1Minute"
+  enabled_metrics     = ["GroupInServiceInstances", "GroupDesiredCapacity", "GroupTotalInstances"]
+
+  lifecycle {
+    precondition {
+      condition     = data.aws_ssm_parameter.image_tag.insecure_value != "unset"
+      error_message = "No image has been released yet. Run the Jenkins pipeline first."
+    }
+  }
 
   launch_template {
     id      = aws_launch_template.app.id
@@ -93,15 +102,5 @@ resource "aws_autoscaling_policy" "cpu" {
       predefined_metric_type = "ASGAverageCPUUtilization"
     }
     target_value = 50
-  }
-}
-
-metrics_granularity = "1Minute"
-enabled_metrics     = ["GroupInServiceInstances", "GroupDesiredCapacity", "GroupTotalInstances"]
-
-lifecycle {
-  precondition {
-    condition     = data.aws_ssm_parameter.image_tag.insecure_value != "unset"
-    error_message = "No image has been released yet. Run the Jenkins pipeline first."
   }
 }
