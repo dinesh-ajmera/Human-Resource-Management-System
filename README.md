@@ -1,68 +1,67 @@
-   ![CI](https://github.com/dinesh-ajmera/Human-Resource-Management-System/actions/workflows/ci.yml/badge.svg)
-# HR Management System (Flask + MySQL)
+# HRMS: Flask app on AWS with CI/CD, Terraform and monitoring
 
-A web app where employees sign up, check in and out, and request leave,
-and HR approves or rejects leave and views attendance.
+![CI](https://github.com/dinesh-ajmera/Human-Resource-Management-System/actions/workflows/ci.yml/badge.svg)
 
-## Features
-- Sign up and login (passwords hashed, CSRF protection on every form)
-- Two roles: **HR** and **employee**, each with its own dashboard and menu
-- **Employee:** today's attendance card (check in / check out with times and
-  hours worked), request leave, cancel a pending request, filter leave history
-  by status, view attendance with days-present summary
-- **HR:** dashboard with live numbers (employees, pending requests, checked in
-  today, working now), approve or reject leave with a comment, searchable leave
-  history and attendance records, add new users (including more HR accounts)
-- Responsive layout (works on phones) with automatic dark mode
-- Friendly error pages and a `/health` endpoint
+A Flask + MySQL HR system (leave requests, attendance, roles) used as the
+workload for a production-style DevOps pipeline on AWS.
 
-## Tech stack
-Python, Flask, MySQL 8, Gunicorn, Docker, Docker Compose
-
-## Run with Docker (recommended)
-```bash
-cp .env.example .env        # then edit the passwords and secret key
-docker compose up -d --build
-```
-Open http://localhost:5000 and check http://localhost:5000/health
-
-Create the first account with the role **HR**. After one HR account exists,
-only a logged-in HR user can create more HR accounts; everyone else who
-registers becomes an employee.
-
-
-Stop everything: `docker compose down` (add `-v` to also delete the data).
-
-## Run without Docker
-```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-export DB_HOST=127.0.0.1 DB_USER=root DB_PASSWORD=yourpassword SECRET_KEY=something-random
-python models.py            # creates the database and tables
-python routes.py
+## Architecture
+```mermaid
+flowchart LR
+  Dev["Developer"] -->|git push| GH["GitHub"]
+  GH -->|poll| J["Jenkins controller + agent"]
+  J -->|"build, Trivy scan, push"| ECR[("ECR")]
+  J -->|"new image tag + rolling refresh"| ASG
+  User["User"] --> ALB["Application Load Balancer"] --> ASG["Auto Scaling Group (EC2 x2, private subnets)"]
+  ASG --> RDS[("RDS MySQL, private")]
+  ASG -->|pull image| ECR
+  ASG -->|read secrets| SM["Secrets Manager"]
+  ASG -->|logs and metrics| CW["CloudWatch"]
+  CW --> SNS["SNS"] --> Mail["Email alerts"]
 ```
 
-## Configuration (environment variables)
-| Variable | Meaning | Default |
-|---|---|---|
-| DB_HOST / DB_PORT | MySQL address | 127.0.0.1 / 3306 |
-| DB_USER / DB_PASSWORD | MySQL login | root / (empty) |
-| DB_NAME | Database name | HR_system |
-| SECRET_KEY | Signs the login cookie | dev-only value |
-| TZ | Timezone for attendance times (Docker) | Asia/Kolkata |
+## What's inside
+| Area | Tools |
+|---|---|
+| App | Python, Flask, MySQL, Gunicorn |
+| Containers | Docker, Docker Compose, Kubernetes manifests (tested on kind) |
+| CI | GitHub Actions (build + health-check test) |
+| CD | Jenkins controller + agent: build, Trivy scan, push to ECR, rolling release with automatic rollback |
+| Infrastructure | Terraform: VPC (public/private subnets, NAT), ALB, ASG, RDS, ECR, IAM, S3 remote state |
+| Secrets | AWS Secrets Manager, IAM roles (no keys on servers) |
+| Monitoring | CloudWatch dashboard, alarms, log metric filter, SNS email alerts |
 
-## Project structure
-```
-routes.py        Flask routes (pages and actions)
-models.py        Database connection, tables, login check
-config.py        Settings read from environment variables
-templates/       HTML pages (base.html is the shared layout)
-static/          style.css and app.js
-Dockerfile, docker-compose.yml, entrypoint.sh
-```
+## How a release works
+1. Push to `main`.
+2. Jenkins builds the image, scans it with Trivy, pushes it to ECR with an immutable tag.
+3. The new tag is written to SSM Parameter Store and an Auto Scaling instance refresh replaces servers one at a time.
+4. If the refresh fails, the pipeline restores the previous tag.
 
-## Roadmap
-- [x] Containerized with Docker and Compose
-- [ ] CI pipeline (GitHub Actions)
-- [ ] Infrastructure on AWS with Terraform
-- [ ] Jenkins pipeline and monitoring
+## Run it locally
+`cp .env.example .env && docker compose up -d --build` then open http://localhost:5000
+
+## Deploy to AWS
+`./infra/up.sh` creates the environment; `./infra/down.sh` destroys it.
+Layers: `infra/foundation` (always on, near-zero cost) and `infra/envs/dev` (disposable).
+
+## Cost and teardown
+[Your real number from Cost Explorer.] The NAT gateway, ALB and Multi-AZ RDS bill by the hour,
+so the environment is created for a working session and destroyed afterwards.
+ECR, the state bucket and IAM live in a separate layer and survive teardown.
+
+## Security decisions
+- App servers and database are in private subnets; the database accepts traffic only from the app security group
+- IAM roles scoped to one repo / one secret / one parameter
+- Immutable image tags, image scanning on push and in the pipeline
+- CSRF protection, hashed passwords, HR accounts cannot be self-created
+- Terraform state in S3 with versioning, encryption and locking
+
+## Screenshots
+[dashboard, target group healthy, Jenkins stage view, alarm email, the app]
+
+## Known limitations and next steps
+- HTTP only; next step is a domain + ACM certificate + HTTPS listener
+- App uses the RDS master user; next step is a least-privilege MySQL user and secret rotation
+- Kubernetes was tested locally, not on EKS
+- Ansible was the first deployment method and is kept as an earlier stage
+- Jenkins polls GitHub instead of using webhooks
