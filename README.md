@@ -109,7 +109,7 @@ Confirm the SNS subscription email, otherwise alarm emails are not delivered.
 The dev environment is **56 Terraform-managed resources** (the number shown in the destroy plan).
 The NAT gateway, load balancer and Multi-AZ RDS bill by the hour, so the environment is created for a working
 session and destroyed afterwards. ECR, the state bucket and IAM live in a separate layer and survive teardown.
-Measured cost of the testing sessions: **0$**.
+Measured cost of the testing sessions: **4.763$**.
 
 ## Security decisions
 
