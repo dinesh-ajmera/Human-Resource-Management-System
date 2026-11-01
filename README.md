@@ -61,19 +61,19 @@ servers. The pipeline checks `/health`, which includes the database.
 
 ```
 .
-├── routes.py, models.py, config.py, templates/, static/   # the Flask app
-├── Dockerfile, docker-compose.yml                         # local run
-├── .github/workflows/ci.yml                               # GitHub Actions
-├── Jenkinsfile, jenkins/                                  # pipeline and Jenkins setup
+├── app/ (the Flask app: routes, models, config, templates, static)   # the Flask app
+├── Dockerfile, docker-compose.yml                                    # local run
+├── .github/workflows/ci.yml                                          # GitHub Actions
+├── Jenkinsfile, jenkins/                                             # pipeline and Jenkins setup
 ├── infra/
-│   ├── bootstrap/        # S3 bucket for Terraform state (run once)
-│   ├── foundation/       # ECR, Jenkins IAM role, image tag parameter (always on)
-│   ├── modules/vpc/      # reusable network module
-│   ├── envs/dev/         # ALB, ASG, RDS, secrets, monitoring (disposable)
-│   ├── up.sh, down.sh    # create and destroy the dev environment
-├── k8s/                  # Kubernetes manifests
-├── ansible/              # first deployment method (single server)
-└── docs/                 # diagrams, screenshots, runbook
+│   ├── bootstrap/                                                    # S3 bucket for Terraform state (run once)
+│   ├── foundation/                                                   # ECR, Jenkins IAM role, image tag parameter (always on)
+│   ├── modules/vpc/                                                  # reusable network module
+│   ├── envs/dev/                                                     # ALB, ASG, RDS, secrets, monitoring (disposable)
+│   ├── up.sh, down.sh                                                # create and destroy the dev environment
+├── k8s/                                                              # Kubernetes manifests
+├── ansible/                                                          # first deployment method (single server)
+└── docs/                                                             # diagrams, screenshots, runbook
 ```
 
 ## Run it locally
@@ -109,7 +109,7 @@ Confirm the SNS subscription email, otherwise alarm emails are not delivered.
 The dev environment is **56 Terraform-managed resources** (the number shown in the destroy plan).
 The NAT gateway, load balancer and Multi-AZ RDS bill by the hour, so the environment is created for a working
 session and destroyed afterwards. ECR, the state bucket and IAM live in a separate layer and survive teardown.
-Measured cost of the testing sessions: **[fill in from Cost Explorer]**.
+Measured cost of the testing sessions: **0$**.
 
 ## Security decisions
 
