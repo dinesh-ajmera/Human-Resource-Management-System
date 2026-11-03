@@ -21,7 +21,7 @@ jobs:
           - infra/envs/dev
     steps:
       - name: Get the code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
