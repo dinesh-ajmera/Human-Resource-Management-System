@@ -1,0 +1,41 @@
+name: Terraform checks
+
+on:
+  push:
+    paths:
+      - "infra/**"
+      - ".github/workflows/terraform-check.yml"
+  pull_request:
+    paths:
+      - "infra/**"
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir:
+          - infra/bootstrap
+          - infra/foundation
+          - infra/envs/dev
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.5"
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+        working-directory: ${{ matrix.dir }}
+
+      - name: Init without touching the remote state
+        run: terraform init -backend=false -input=false
+        working-directory: ${{ matrix.dir }}
+
+      - name: Validate
+        run: terraform validate
+        working-directory: ${{ matrix.dir }}
